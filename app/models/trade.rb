@@ -6,7 +6,7 @@ class Trade < ApplicationRecord
     inclusion: { in: ['buy', 'sell'] }
   }
 
-  validates :share, {
+  validates :shares, {
     inclusion: { in: 1..100 }
   }
 end

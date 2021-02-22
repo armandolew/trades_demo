@@ -1,11 +1,22 @@
 class TradesController < ApplicationController
   before_action :set_trade, only: [:show, :update, :destroy]
 
+  rescue_from StandardError, :with => :render_404
+  rescue_from ActiveRecord::RecordNotFound, :with => :not_found
+
   # GET /trades
   def index
-    @trades = Trade.all
+    trades = Trade.all
+    if params.key? 'user_id'
+      user = User.find(params.dig(:user_id))
+      trades = user.trades
+    end
 
-    render json: @trades
+    if params.key? 'trade_type'
+      trades = trades.where('trade_type =?', params[:trade_type])
+    end
+
+    render json: trades
   end
 
   # GET /trades/1
@@ -16,36 +27,26 @@ class TradesController < ApplicationController
   # POST /trades
   def create
     @trade = Trade.new(trade_params)
-
-    if @trade.save
-      render json: @trade, status: :created, location: @trade
-    else
-      render json: @trade.errors, status: :unprocessable_entity
-    end
+    @trade.save!
+    render json: @trade
   end
 
   # PATCH/PUT /trades/1
   def update
-    if @trade.update(trade_params)
-      render json: @trade
-    else
-      render json: @trade.errors, status: :unprocessable_entity
-    end
+    protected_against_modification('Update is not allowed')
   end
 
   # DELETE /trades/1
   def destroy
-    @trade.destroy
+    protected_against_modification('Deletion is not allowed')
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
     def set_trade
       @trade = Trade.find(params[:id])
     end
 
-    # Only allow a trusted parameter "white list" through.
     def trade_params
-      params.require(:trade).permit(:trade_type, :symbol, :shares, :price, :timestamp)
+      params.require(:trade).permit(:trade_type, :symbol, :shares, :price, :timestamp, :user_id)
     end
 end
