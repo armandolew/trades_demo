@@ -1,5 +1,5 @@
 class TradesController < ApplicationController
-  before_action :set_trade, only: [:show, :update, :destroy]
+  before_action :set_trade, only: [:show]
 
   rescue_from StandardError, :with => :render_404
   rescue_from ActiveRecord::RecordNotFound, :with => :not_found
