@@ -28,7 +28,7 @@ class TradesController < ApplicationController
   def create
     @trade = Trade.new(trade_params)
     @trade.save!
-    render json: @trade
+    render json: @trade, status: :created
   end
 
   # PATCH/PUT /trades/1
